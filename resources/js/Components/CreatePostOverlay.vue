@@ -23,11 +23,11 @@
           <div class="p-4">
             <div class="flex items-center">
               <img
-                src="https://picsum.photos/id/58/300/320"
+                :src="user.image"
                 class="rounded-full ml-1 min-w-[45px] max-h-[45px]"
               />
               <div class="ml-4">
-                <div class="font-extrabold">David Mutua</div>
+                <div class="font-extrabold">{{ user.name }}</div>
                 <div
                   class="flex items-center justify-between w-[100px] bg-gray-200 p-0.5 px-2 rounded-lg"
                 >
@@ -99,6 +99,8 @@
             </div>
 
             <button
+              type="button"
+              @click="createPost"
               class="w-full bg-blue-500 hover:bg-blue-600 text-white font-extrabold p-1.5 mt-3 rounded-lg"
             >
               Post
@@ -140,6 +142,26 @@ const form = reactive({
 });
 
 let error = ref(null);
+
+const createPost = () => {
+  router.post("/post", form, {
+    // Serialize the form data as FormData before making the request. Default is JSON
+    forceFormData: true,
+    // Maintain initial scroll position
+    preserveScroll: true,
+    // Incase we have any client or serverside errors
+    onError: (errors) => {
+      errors && errors.text ? (error.value = errors.text) : "";
+      errors && errors.image ? (error.value = errors.image) : "";
+    },
+    // After successful submission to database
+    onSuccess: () => {
+      form.text = null;
+      form.image = null;
+      emit("showModal", false); // close the 'create_post' modal
+    },
+  });
+};
 
 const getUploadedImage = (event) => {
   // convert the file into an object url

@@ -1,34 +1,3 @@
-<script setup>
-import { ref } from "vue";
-import { Link, usePage } from "@inertiajs/vue3";
-
-import Magnify from "vue-material-design-icons/Magnify.vue";
-import Home from "vue-material-design-icons/Home.vue";
-import HomeOutline from "vue-material-design-icons/HomeOutline.vue";
-import TelevisionPlay from "vue-material-design-icons/TelevisionPlay.vue";
-import StorefrontOutline from "vue-material-design-icons/StorefrontOutline.vue";
-import AccountGroup from "vue-material-design-icons/AccountGroup.vue";
-import ControllerClassicOutline from "vue-material-design-icons/ControllerClassicOutline.vue";
-import DotsGrid from "vue-material-design-icons/DotsGrid.vue";
-import FacebookMessenger from "vue-material-design-icons/FacebookMessenger.vue";
-import Bell from "vue-material-design-icons/Bell.vue";
-import Logout from "vue-material-design-icons/Logout.vue";
-
-import CropperModal from "@/Components/CropperModal.vue";
-import ImageDisplay from "@/Components/ImageDisplay.vue";
-import CreatePostOverlay from "@/Components/CreatePostOverlay.vue";
-
-// Pinia
-import { useGeneralStore } from "@/stores/general";
-import { storeToRefs } from "pinia";
-const useGeneral = useGeneralStore();
-const { isPostOverlay, isCropperModal, isImageDisplay } = storeToRefs(useGeneral);
-
-// Bring the logged in user
-const user = usePage().props.auth.user;
-let showMenu = ref(false);
-</script>
-
 <template>
   <!-- 
     setup the page layout.
@@ -145,7 +114,7 @@ let showMenu = ref(false);
         i.e. Element is perfect square
          -->
           <img
-            src="https://picsum.photos/id/58/300/320"
+            :src="user.image"
             class="rounded-full ml-1 min-w-[40px] max-h-[40px] cursor-pointer"
           />
         </button>
@@ -159,15 +128,15 @@ let showMenu = ref(false);
             HINT: menu items will be stacked
              -->
           <Link
-            href="/"
+            :href="route('user.show', { id: user.id })"
             @click="showMenu = !showMenu"
             class="flex items-center gap-3 hover:bg-gray-300 p-2 rounded-lg"
           >
             <img
-              src="https://picsum.photos/id/58/300/320"
+              :src="user.image"
               class="rounded-full ml-1 min-w-[35px] max-h-[35px] cursor-pointer"
             />
-            <span>David Mutua</span>
+            <span>{{ user.name }}</span>
           </Link>
           <Link class="w-full" :href="route('logout')" as="button" method="post">
             <div class="flex items-center gap-3 hover:bg-gray-200 px-2 py-2.5 rounded-lg">
@@ -188,3 +157,34 @@ let showMenu = ref(false);
   <CropperModal v-if="isCropperModal" @showModal="isCropperModal = false" />
   <ImageDisplay v-if="isImageDisplay" />
 </template>
+
+<script setup>
+import { ref } from "vue";
+import { Link, usePage } from "@inertiajs/vue3";
+
+import Magnify from "vue-material-design-icons/Magnify.vue";
+import Home from "vue-material-design-icons/Home.vue";
+import HomeOutline from "vue-material-design-icons/HomeOutline.vue";
+import TelevisionPlay from "vue-material-design-icons/TelevisionPlay.vue";
+import StorefrontOutline from "vue-material-design-icons/StorefrontOutline.vue";
+import AccountGroup from "vue-material-design-icons/AccountGroup.vue";
+import ControllerClassicOutline from "vue-material-design-icons/ControllerClassicOutline.vue";
+import DotsGrid from "vue-material-design-icons/DotsGrid.vue";
+import FacebookMessenger from "vue-material-design-icons/FacebookMessenger.vue";
+import Bell from "vue-material-design-icons/Bell.vue";
+import Logout from "vue-material-design-icons/Logout.vue";
+
+import CropperModal from "@/Components/CropperModal.vue";
+import ImageDisplay from "@/Components/ImageDisplay.vue";
+import CreatePostOverlay from "@/Components/CreatePostOverlay.vue";
+
+// Pinia
+import { useGeneralStore } from "@/stores/general";
+import { storeToRefs } from "pinia";
+const useGeneral = useGeneralStore();
+const { isPostOverlay, isCropperModal, isImageDisplay } = storeToRefs(useGeneral);
+
+// Bring the logged in user
+const user = usePage().props.auth.user;
+let showMenu = ref(false);
+</script>

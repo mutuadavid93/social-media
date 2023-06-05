@@ -27,7 +27,7 @@ const user = usePage().props.auth.user;
 <template>
   <div id="CreatePostBox" class="w-full bg-white rounded-lg px-3 mt-4 shadow-md">
     <div class="flex items-center py-3 border-b">
-      <Link href="/" class="mr-2">
+      <Link :href="route('user.show', { id: user.id })" class="mr-2">
         <img :src="image" class="rounded-full ml-1 min-w-[36px] max-w-[36px]" />
       </Link>
       <div

@@ -19,10 +19,6 @@ use App\Http\Controllers\ProfileController;
 |
 */
 
-// Route::get('/', fn() => Inertia::render('Posts'));
-Route::get('/user', fn() => Inertia::render('User'))->name("user");
-
-
 // NOTE: all the routes inside 'auth' middleware require authentication
 Route::middleware('auth')->group(function () {
     Route::get('/', [PostController::class, 'index'])->name('posts.index');

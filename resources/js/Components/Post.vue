@@ -13,6 +13,7 @@ const useGeneral = useGeneralStore();
 const { isImageDisplay } = storeToRefs(useGeneral);
 
 const form = reactive({
+  // TIP: to be used with v-model
   comment: null,
 });
 
@@ -20,31 +21,64 @@ const props = defineProps({
   user: Object,
   post: Object,
   comments: Object,
-
-  // Image prop to test
-  image: String,
 });
-const { post, user, comments, image } = toRefs(props);
+const { post, user, comments } = toRefs(props);
+
+// Now we use `router` from InertiaJS.
+// TIP: property values are posted on CommentController's store method
+const createComment = () => {
+  router.post(
+    "/comment",
+    {
+      post_id: post.value.id,
+      text: form.comment,
+    },
+    // Maintain scroll position
+    { preserveScroll: true }
+  );
+};
+
+// Remove comment from Database
+const deleteComment = (id) => {
+  router.delete("/comment/" + id, {
+    preserveScroll: true,
+  });
+};
+
+// Remove post from Database
+const deletePost = (id) => {
+  router.delete("/post/" + id, {
+    preserveScroll: true,
+  });
+};
+
+// Get user by id
+const isUser = () => {
+  router.get("/user/" + user.value.id);
+};
 </script>
 
 <template>
   <div id="Post" class="w-full bg-white rounded-lg my-4 shadow-md">
     <div class="flex items-center py-3 px-3">
-      <button class="mr-2">
-        <img
-          src="https://picsum.photos/id/141/300/320"
-          class="rounded-full ml-1 min-w-[42px] max-h-[42px]"
-        />
+      <!-- Navigate to user profile page -->
+      <button @click="isUser" class="mr-2">
+        <img :src="user?.image" class="rounded-full ml-1 min-w-[42px] max-h-[42px]" />
       </button>
       <div class="flex items-center justify-between p-2 rounded-full w-full">
         <div>
-          <div class="font-extrabold text-[15px]">David Mutua</div>
+          <div class="font-extrabold text-[15px]">{{ user?.name }}</div>
           <div class="flex items-center text-xs text-gray-600">
-            14h <AccountMultiple class="ml-1" :size="15" fillColor="#64676B" />
+            {{ post?.created_at }}
+            <AccountMultiple class="ml-1" :size="15" fillColor="#64676B" />
           </div>
         </div>
         <div class="flex items-center">
-          <button class="rounded-full p-1.5 cursor-pointer hover:bg-[#F2F2F2]">
+          <button
+            @click="deletePost(post.id)"
+            v-if="$page.props.auth.user.id === post.user.id"
+            class="rounded-full p-1.5 cursor-pointer hover:bg-[#F2F2F2]"
+          >
             <Delete fillColor="#64676B" />
           </button>
         </div>
@@ -52,29 +86,30 @@ const { post, user, comments, image } = toRefs(props);
     </div>
 
     <div class="px-5 pb-2 text-[17px] font-semibold">
-      Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptate blanditiis enim,
-      labore magnam inventore voluptas perferendis vel qui assumenda.
+      {{ post?.text }}
     </div>
 
     <img
-      @click="isImageDisplay = image || 'https://picsum.photos/id/190/800/800'"
-      :src="image || 'https://picsum.photos/id/190/800/800'"
+      @click="isImageDisplay = post?.image"
+      :src="post?.image"
       class="mx-auto cursor-pointer"
     />
 
     <div id="Likes" class="px-5">
       <div class="flex items-center justify-between border-b">
         <ThumbUp fillColor="#ID72E2" :size="16" />
-        <div class="text-sm text-gray-600 font-semibold">5 comments</div>
+        <div class="text-sm text-gray-600 font-semibold">
+          {{ comments?.length }} comments
+        </div>
       </div>
     </div>
 
     <div id="Comments" class="px-3">
       <div id="CreateComment" class="flex items-center justify-between py-2">
         <div class="flex items-center w-full">
-          <Link href="/" class="mr-2">
+          <Link :href="route('user.show', { id: $page.props.auth.user.id })" class="mr-2">
             <img
-              src="https://picsum.photos/id/190/800/800"
+              :src="$page.props.auth.user.image"
               class="rounded-full ml-1 min-w-[36px] max-w-[36px]"
             />
           </Link>
@@ -88,6 +123,7 @@ const { post, user, comments, image } = toRefs(props);
               placeholder="Write a public comment..."
             />
             <button
+              @click="createComment"
               type="button"
               class="flex items-center text-[#FFFFFF] text-sm pl-2 pr-3.5 rounded-full bg-blue-500 hover:bg-blue-600"
             >
@@ -98,19 +134,28 @@ const { post, user, comments, image } = toRefs(props);
       </div>
 
       <!-- Comments section -->
-      <div class="max-h-[120px] overflow-auto pb-2 px-4">
-        <div class="flex items-center justify-between pb-2">
-          <Link href="/" class="mr-2">
+      <div v-if="comments" class="max-h-[120px] overflow-auto pb-2 px-4">
+        <div
+          class="flex items-center justify-between pb-2"
+          v-for="comment in comments"
+          :key="comment"
+        >
+          <Link :href="route('posts.index')" class="mr-2">
             <img
-              src="https://picsum.photos/id/190/800/800"
+              :src="comment.user.image"
               class="rounded-full ml-1 min-w-[36px] max-h-[36px]"
             />
           </Link>
           <div class="flex items-center w-full">
             <div class="flex items-center bg-[#EFF2F5] text-xs p-2 rounded-lg w-full">
-              A comment from a another user
+              {{ comment.text }}
             </div>
-            <button class="rounded-full p-1.5 ml-2 cursor-pointer hover:bg-[#F2F2F2]">
+            <button
+              type="button"
+              v-if="$page.props.auth.user.id === comment.user.id"
+              @click="deleteComment(comment.id)"
+              class="rounded-full p-1.5 ml-2 cursor-pointer hover:bg-[#F2F2F2]"
+            >
               <Delete fillColor="#64676B" />
             </button>
           </div>

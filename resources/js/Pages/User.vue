@@ -25,10 +25,19 @@
             <div class="flex md:flex-row flex-col gap-4 md:-mt-6 -mt-16 items-center">
               <div class="relative">
                 <img
-                  src="https://picsum.photos/id/58/300/320"
+                  :src="user.image"
                   class="rounded-full w-[165px] h-[165px] border-white border-4"
                 />
+
+                <!-- 
+                  TIP:
+                  Get currently logged in user's id, compare it to user's id from Database to 
+                  confirm it's the actual user not a different user.
+
+                  Otherwise hide ability to change profile picture.
+                -->
                 <button
+                  v-if="$page.props.auth.user.id === user.id"
                   @click="isCropperModal = true"
                   class="absolute right-0 top-[100px] bg-gray-200 hover:bg-gray-300 p-1.5 rounded-full cursor-pointer"
                 >
@@ -37,7 +46,7 @@
               </div>
 
               <div class="md:mt-4 text-center md:text-left -mt-3">
-                <div class="text-[28px] font-extrabold pt-1">David Mutua</div>
+                <div class="text-[28px] font-extrabold pt-1">{{ user.name }}</div>
                 <div
                   class="text-[17px] font-bold text-gray-600 mb-1.5 text-center md:text-left"
                 >
@@ -86,7 +95,8 @@
             </div>
 
             <Link
-              href="/"
+              v-if="$page.props.auth.user.id === user.id"
+              :href="route('profile.edit')"
               class="flex justify-center w-7/12 md:w-[160px] items-baseline md:my-0 my-4 bg-gray-200 hover:bg-gray-300 rounded-lg cursor-pointer"
             >
               <button class="flex items-center px-5 py-2 font-bold">
@@ -180,12 +190,17 @@
           <div class="bg-white p-3 mt-4 rounded-lg shadow-lg">
             <div class="font-extrabold pb-2 text-xl">Photos</div>
             <!-- NOTE: flex-wrap: items will stay in a single line and won't wrap -->
-            <div class="flex flex-wrap items-center w-full">
+            <div class="flex flex-wrap items-center justify-start w-full">
               <!-- w-1/3: 33% -->
-              <span class="w-1/3">
+              <span
+                v-for="photo in posts.data"
+                v-show="photo.image !== null"
+                :key="photo"
+                class="w-1/3"
+              >
                 <img
-                  @click="isImageDisplay = 'https://picsum.photos/id/78/300/300'"
-                  src="https://picsum.photos/id/78/300/300"
+                  @click="isImageDisplay = photo.image"
+                  :src="photo.image"
                   class="aspect-square object-cover p-1 rounded-lg cursor-pointer"
                 />
               </span>
@@ -194,17 +209,16 @@
         </div>
 
         <div id="PostSection" class="w-full md:w-7/12 overflow-auto">
+          <!-- TIP: allow the correct user to create a post or see `what's on your mind status section` -->
           <CreatePostBox
-            image="https://picsum.photos/id/58/300/320"
-            placeholder="What's on your mind David Mutua"
+            v-if="$page.props.auth.user.id === user.id"
+            :image="user.image"
+            :placeholder="`What's on your mind ${user.name}`"
           />
 
-          <Post image="https://picsum.photos/id/191/800/800" />
-          <Post image="https://picsum.photos/id/193/800/800" />
-          <Post image="https://picsum.photos/id/194/800/800" />
-          <Post image="https://picsum.photos/id/195/800/800" />
-          <Post image="https://picsum.photos/id/196/800/800" />
-          <Post />
+          <div v-for="post in posts.data" :key="post">
+            <Post :user="post.user" :post="post" :comments="post.comments" />
+          </div>
         </div>
       </div>
     </div>
@@ -212,6 +226,7 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import { Link, Head } from "@inertiajs/vue3";
 import MainNavLayout from "@/Layouts/MainNavLayout.vue";
 import CreatePostBox from "@/Components/CreatePostBox.vue";
@@ -225,7 +240,6 @@ import { storeToRefs } from "pinia";
 const useGeneral = useGeneralStore();
 const { isCropperModal, isImageDisplay } = storeToRefs(useGeneral);
 
-// defineProps({ posts: Object, user: Object });
-
-const rand = (min = 45, max = 48) => Math.floor(Math.random() * (max - min + 1)) + min;
+// NOTE: This comes from UserController as props
+const { posts, user } = defineProps({ posts: Object, user: Object });
 </script>

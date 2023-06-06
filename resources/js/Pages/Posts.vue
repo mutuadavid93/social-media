@@ -30,14 +30,16 @@
         <div id="LeftSection" class="xl:w-[345px] lg:block hidden">
           <div class="pt-4 max-w-[320px] pr-4">
             <Link
-              href="/"
+              :href="route('user.show', { id: user.id })"
               class="flex items-center justify-start w-full cursor-pointer hover:bg-[#E5E6E9] p-2 rounded-md"
             >
               <img
-                src="https://picsum.photos/id/58/300/320"
+                :src="user.image"
                 class="rounded-full ml-1 min-w-[38px] max-h-[38px]"
               />
-              <div class="text-[15px] text-gray-800 font-extrabold pl-3">David Mutua</div>
+              <div class="text-[15px] text-gray-800 font-extrabold pl-3">
+                {{ user.name }}
+              </div>
             </Link>
 
             <button
@@ -99,16 +101,13 @@
           class="row-span-6 max-w-[600px] lg:mx-0 mx-auto overflow-auto"
         >
           <CreatePostBox
-            image="https://picsum.photos/id/58/300/320"
-            placeholder="What's on your mind David Mutua"
+            :image="user.image"
+            :placeholder="`What's on your mind ${user.name}`"
           />
 
-          <Post image="https://picsum.photos/id/191/800/800"/>
-          <Post image="https://picsum.photos/id/193/800/800"/>
-          <Post image="https://picsum.photos/id/194/800/800"/>
-          <Post image="https://picsum.photos/id/195/800/800"/>
-          <Post image="https://picsum.photos/id/196/800/800"/>
-          <Post />
+          <div v-for="post in posts.data" :key="post">
+            <Post :user="post.user" :post="post" :comments="post.comments" />
+          </div>
         </div>
 
         <!-- 
@@ -339,6 +338,8 @@ import ClockTimeTwoOutline from "vue-material-design-icons/ClockTimeTwoOutline.v
 import Restore from "vue-material-design-icons/Restore.vue";
 import VideoImage from "vue-material-design-icons/VideoImage.vue";
 import DotsHorizontal from "vue-material-design-icons/DotsHorizontal.vue";
+
+defineProps({ posts: { type: Object } });
 
 const user = usePage().props.auth.user;
 </script>

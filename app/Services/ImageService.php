@@ -26,7 +26,7 @@ class ImageService
         }
 
         // Otherwise
-        $file = $request->file['image'];
+        $file = $request->file('image');
         $extension = $file->getClientOriginalExtension();
 
         if ($request->width) {

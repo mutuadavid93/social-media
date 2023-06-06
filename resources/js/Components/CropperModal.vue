@@ -109,12 +109,12 @@ let uploadedImage = ref(null);
 
 // Image Metadata
 let croppedImageData = {
-  file: null,
+  // file: null,
   imageUrl: null,
-  height: null,
-  width: null,
-  left: null,
-  top: null,
+  // height: null,
+  // width: null,
+  // left: null,
+  // top: null,
 };
 
 const getUploadedImage = (event) => {
@@ -136,7 +136,11 @@ const crop = () => {
   data.append("right", coordinates.right || "");
   data.append("top", coordinates.top || "");
 
-  // TODO: Send to Backend
+  router.post("/user/update-image", data, {
+    // TIP: we needed the updated state of the Page. 
+    // NOTE: The page's state won't be carried to the next navigation instead it will start with fresh state
+    preserveState: false,
+  });
 
   // Close the modal by emitting an event to parent component i.e. @showModal
   emit("showModal", false);
